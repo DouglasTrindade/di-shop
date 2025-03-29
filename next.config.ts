@@ -6,7 +6,11 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        source: "/(admin)/:path*",
+        source: "/",
+        destination: "/admin",
+      },
+      {
+        source: "/admin/:path*",
         destination: "/admin/:path*",
       },
     ];
