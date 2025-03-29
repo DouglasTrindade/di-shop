@@ -8,3 +8,5 @@ const users: User[] = [
     password: "123123123",
   },
 ];
+
+export { users };
