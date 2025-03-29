@@ -14,5 +14,43 @@ model User {
   id        String    @id @default(cuid())
   email     String    @unique
   name      String
-  password  String
+  password  String 
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  orders Order[]
+}
+
+model Product {
+  id                     String     @id @default(uuid())
+  name                   String
+  PriceInCents           Int
+  filePath               String
+  imagePath              String
+  description            String
+  isAvailableForPurchase Boolean         @default(true)
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+  orders Order[]
+  downloadVerifications DownloadVerification[]
+}
+
+model Order {
+  id                     String     @id @default(uuid())
+  PricePaidInCents       Int
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+
+  userId                 String
+  productId              String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+}
+
+model DownloadVerification {
+  id            String      @id @default(uuid())
+  expiresAt     DateTime
+  createdAt     DateTime    @default(now())
+  productId     String
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+ 
 }
