@@ -3,6 +3,15 @@
 import { login } from "@/lib/actions/auth";
 
 export default function Home() {
+  const fetchUsers = async () => {
+    const res = await fetch("/api/users/cmabymts600001j0v5040zjuw");
+    const data = res.json();
+
+    return data;
+  };
+
+  fetchUsers();
+
   return (
     <div>
       <p>Você não está logado</p>
