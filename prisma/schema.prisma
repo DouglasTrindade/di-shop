@@ -1,56 +1,96 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id        String    @id @default(cuid())
-  email     String    @unique
-  name      String
-  password  String 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  orders Order[]
+  email         String          @unique
+  name          String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  id            String          @id @default(cuid())
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  Authenticator Authenticator[]
+  Order         Order[]
+  sessions      Session[]
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+model Authenticator {
+  credentialID         String  @unique
+  userId               String
+  providerAccountId    String
+  credentialPublicKey  String
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+  user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, credentialID])
 }
 
 model Product {
-  id                     String     @id @default(uuid())
-  name                   String
-  PriceInCents           Int
-  filePath               String
-  imagePath              String
-  description            String
-  isAvailableForPurchase Boolean         @default(true)
-  createdAt              DateTime        @default(now())
-  updatedAt              DateTime        @updatedAt
-  orders Order[]
-  downloadVerifications DownloadVerification[]
+  name                      String
+  description               String
+  priceInCents              Int
+  id                        Int      @id @default(autoincrement())
+  created_at                DateTime @default(now())
+  file_path                 String
+  image_path                String
+  is_available_for_purchase Boolean  @default(true)
+  updated_at                DateTime @updatedAt
+  orders                    Order[]
 }
 
 model Order {
-  id                     String     @id @default(uuid())
-  PricePaidInCents       Int
-  createdAt              DateTime        @default(now())
-  updatedAt              DateTime        @updatedAt
-
-  userId                 String
-  productId              String
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
-}
-
-model DownloadVerification {
-  id            String      @id @default(uuid())
-  expiresAt     DateTime
-  createdAt     DateTime    @default(now())
-  productId     String
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
- 
+  id                  Int      @id @default(autoincrement())
+  created_at          DateTime @default(now())
+  price_paid_in_cents Int
+  product_id          Int
+  updated_at          DateTime @updatedAt
+  user_id             String
+  product             Product  @relation(fields: [product_id], references: [id])
+  user                User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
